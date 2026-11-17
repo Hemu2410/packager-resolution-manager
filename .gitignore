@@ -1,0 +1,16 @@
+# PowerPoint presentation
+*.pptx
+
+# Compiled C++ binaries & object files
+*.exe
+*.o
+*.obj
+pkg-resolver
+test_suite
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Temporary exported CNF files
+*.cnf

@@ -1,0 +1,25 @@
+{
+  "packages": [
+    {
+      "name": "serviceA",
+      "version": "1.0.0",
+      "dependencies": {
+        "serviceB": "^1.0.0"
+      }
+    },
+    {
+      "name": "serviceB",
+      "version": "1.0.0",
+      "dependencies": {
+        "serviceC": "^1.0.0"
+      }
+    },
+    {
+      "name": "serviceC",
+      "version": "1.0.0",
+      "dependencies": {
+        "serviceA": "^1.0.0"
+      }
+    }
+  ]
+}

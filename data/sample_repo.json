@@ -1,0 +1,114 @@
+{
+  "packages": [
+    {
+      "name": "webapp",
+      "version": "1.0.0",
+      "dependencies": {
+        "express": "^4.17.0",
+        "jwt-auth": "^1.0.0"
+      }
+    },
+    {
+      "name": "webapp",
+      "version": "2.0.0",
+      "dependencies": {
+        "express": "^4.18.0",
+        "jwt-auth": "^2.0.0",
+        "pg-driver": "^8.0.0"
+      }
+    },
+    {
+      "name": "webapp",
+      "version": "2.1.0",
+      "dependencies": {
+        "express": "^4.18.0",
+        "jwt-auth": "^2.0.0",
+        "pg-driver": "^8.0.0"
+      }
+    },
+    {
+      "name": "express",
+      "version": "4.17.0",
+      "dependencies": {
+        "router": "^1.0.0"
+      }
+    },
+    {
+      "name": "express",
+      "version": "4.18.2",
+      "dependencies": {
+        "router": "^1.3.0"
+      }
+    },
+    {
+      "name": "router",
+      "version": "1.0.0"
+    },
+    {
+      "name": "router",
+      "version": "1.3.5"
+    },
+    {
+      "name": "jwt-auth",
+      "version": "1.0.0",
+      "dependencies": {
+        "crypto-core": "^1.0.0"
+      }
+    },
+    {
+      "name": "jwt-auth",
+      "version": "2.0.0",
+      "dependencies": {
+        "crypto-core": ">=2.0.0"
+      },
+      "conflicts": {
+        "legacy-security": "*"
+      }
+    },
+    {
+      "name": "crypto-core",
+      "version": "1.0.0"
+    },
+    {
+      "name": "crypto-core",
+      "version": "2.1.0"
+    },
+    {
+      "name": "pg-driver",
+      "version": "8.0.0",
+      "dependencies": {
+        "sql-parser": "^2.0.0"
+      }
+    },
+    {
+      "name": "pg-driver",
+      "version": "8.7.1",
+      "dependencies": {
+        "sql-parser": "^2.1.0"
+      }
+    },
+    {
+      "name": "sql-parser",
+      "version": "2.0.0"
+    },
+    {
+      "name": "sql-parser",
+      "version": "2.1.4"
+    },
+    {
+      "name": "legacy-security",
+      "version": "1.0.0"
+    },
+    {
+      "name": "unused-library",
+      "version": "9.9.9",
+      "dependencies": {
+        "heavy-package": "*"
+      }
+    },
+    {
+      "name": "heavy-package",
+      "version": "1.0.0"
+    }
+  ]
+}

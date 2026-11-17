@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Package Dependency Resolver — MFCS</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-title">
+        <div class="title-row">
+          <h1>Package Dependency Resolver</h1>
+          <span class="pill-tag">C++14 · SAT + DAG</span>
+        </div>
+        <p class="subtitle">Constraint-based resolution using Graph Pruning, CNF Encoding &amp; DPLL</p>
+      </div>
+      <div class="header-actions">
+        <button id="openRepoBtn" class="btn btn-outline">Edit Repository (<span id="repoCount">0</span>)</button>
+      </div>
+    </header>
+
+    <!-- Query Bar with Custom Dropdowns -->
+    <section class="card query-bar">
+      <div class="field">
+        <label>Scenario Preset</label>
+        <div class="custom-select" id="presetDropdown">
+          <button type="button" class="select-trigger" id="presetTrigger">
+            <span class="select-text">Loading...</span>
+            <svg class="chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="select-menu hidden" id="presetMenu"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Target Package</label>
+        <div class="custom-select" id="targetDropdown">
+          <button type="button" class="select-trigger" id="targetTrigger">
+            <span class="select-text">—</span>
+            <svg class="chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="select-menu hidden" id="targetMenu"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="constraintInput">Version Constraint</label>
+        <input type="text" id="constraintInput" value="^2.0.0" placeholder="e.g. *, ^2.0.0, >=1.0.0" />
+      </div>
+
+      <div class="field field-btn">
+        <button id="resolveBtn" class="btn btn-primary">Resolve</button>
+      </div>
+    </section>
+
+    <!-- Summary Strip -->
+    <section class="summary-strip" id="summaryStrip">
+      <div class="stat-box">
+        <span class="stat-label">Status</span>
+        <span id="statusVal" class="stat-value">—</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Selected</span>
+        <span id="installedVal" class="stat-value">—</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">BFS Pruned</span>
+        <span id="prunedVal" class="stat-value">—</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">CNF Size</span>
+        <span id="cnfVal" class="stat-value">—</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">Solve Time</span>
+        <span id="timeVal" class="stat-value">—</span>
+      </div>
+    </section>
+
+    <!-- Conflict / Cycle Alert Banner -->
+    <section id="alertBanner" class="alert-banner hidden"></section>
+
+    <!-- Dependency Graph -->
+    <section class="card graph-card">
+      <div class="card-header">
+        <div class="segmented">
+          <button id="modeResolvedBtn" class="seg-btn active">Resolved Graph</button>
+          <button id="modePruningBtn" class="seg-btn">BFS Pruning View</button>
+        </div>
+        <div class="graph-controls">
+          <span class="legend">
+            <span><i class="dot dot-root"></i> Target</span>
+            <span><i class="dot dot-ok"></i> Selected</span>
+            <span><i class="dot dot-pruned"></i> Pruned</span>
+          </span>
+          <button id="zoomInBtn" class="btn btn-sm" title="Zoom in">+</button>
+          <button id="zoomOutBtn" class="btn btn-sm" title="Zoom out">−</button>
+          <button id="zoomFitBtn" class="btn btn-sm">Reset</button>
+        </div>
+      </div>
+
+      <div class="svg-wrap" id="svgContainer">
+        <svg id="graphSvg" width="100%" height="100%">
+          <defs>
+            <filter id="node-shadow" x="-10%" y="-10%" width="120%" height="130%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.08" />
+            </filter>
+            <marker id="arrow-normal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#3b82f6" />
+            </marker>
+            <marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+            </marker>
+            <marker id="arrow-cycle" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+            </marker>
+          </defs>
+          <g id="graphViewport"></g>
+        </svg>
+
+        <div id="nodePopover" class="popover hidden">
+          <div class="popover-head">
+            <strong id="popTitle">pkg</strong>
+            <button id="popClose" class="close-btn">✕</button>
+          </div>
+          <div id="popBody" class="popover-body"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Details Tabs -->
+    <section class="card details-card">
+      <div class="tabs">
+        <button class="tab active" data-tab="plan">Install Order <span class="tab-count" id="countPlan">0</span></button>
+        <button class="tab" data-tab="cnf">SAT Formula (CNF) <span class="tab-count" id="countCnf">0</span></button>
+        <button class="tab" data-tab="metrics">Solver Details</button>
+      </div>
+
+      <div class="tab-pane active" id="tab-plan"></div>
+      <div class="tab-pane" id="tab-cnf"></div>
+      <div class="tab-pane" id="tab-metrics"></div>
+    </section>
+  </div>
+
+  <!-- Repository Editor Modal -->
+  <div id="repoModal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Repository Packages</h3>
+        <div class="modal-head-actions">
+          <button id="toggleRawJsonBtn" class="btn btn-sm">Edit Raw JSON</button>
+          <button id="resetRepoBtn" class="btn btn-sm">Reset</button>
+          <button id="closeRepoBtn" class="close-btn">✕</button>
+        </div>
+      </div>
+
+      <div id="repoVisualEditor" class="modal-body">
+        <div class="add-row">
+          <input type="text" id="newPkgName" placeholder="Name (e.g. auth)" />
+          <input type="text" id="newPkgVer" placeholder="Version (1.0.0)" />
+          <input type="text" id="newPkgDeps" placeholder="Deps (crypto:^1.0.0)" />
+          <input type="text" id="newPkgConfs" placeholder="Conflicts (legacy:*)" />
+          <button id="addPkgSubmitBtn" class="btn btn-primary btn-sm">Add</button>
+        </div>
+        <div id="repoList" class="repo-list"></div>
+      </div>
+
+      <div id="repoRawEditor" class="modal-body hidden">
+        <textarea id="rawJsonTextarea" spellcheck="false"></textarea>
+        <div class="modal-foot">
+          <button id="applyRawJsonBtn" class="btn btn-primary">Apply JSON &amp; Resolve</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
